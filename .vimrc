@@ -179,3 +179,5 @@ endfunction
 " vim:foldmethod=marker:foldlevel=0
 
 au BufNewFile,BufRead *.yaml,*.yml so ~/.vim/syntax/yaml.vim
+
+let g:jsx_ext_required = 0
