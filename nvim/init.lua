@@ -874,8 +874,14 @@ require('lazy').setup({
       fuzzy = { implementation = 'lua' },
 
       -- Shows a signature help window while you type arguments for a function
-      signature = { enabled = true },
-    },
+    signature = { enabled = true },
+  },
+  },
+
+  { -- Enhanced TypeScript support with auto-imports on completion
+    'pmizio/typescript-tools.nvim',
+    dependencies = { 'nvim-lua/plenary.nvim', 'neovim/nvim-lspconfig' },
+    opts = {},
   },
 
   { -- You can easily change to a different colorscheme.
