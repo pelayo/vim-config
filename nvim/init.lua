@@ -190,14 +190,20 @@ vim.keymap.set('t', '<Esc><Esc>', '<C-\\><C-n>', { desc = 'Exit terminal mode' }
 -- vim.keymap.set('n', '<up>', '<cmd>echo "Use k to move!!"<CR>')
 -- vim.keymap.set('n', '<down>', '<cmd>echo "Use j to move!!"<CR>')
 
+-- Movement keys for a Spanish dvorak layout
+vim.keymap.set({ 'n', 'x', 'o' }, '<C-r>', 'h', { desc = 'Move left' })
+vim.keymap.set({ 'n', 'x', 'o' }, '<C-n>', 'l', { desc = 'Move right' })
+vim.keymap.set({ 'n', 'x', 'o' }, '<C-c>', 'k', { desc = 'Move up' })
+vim.keymap.set({ 'n', 'x', 'o' }, '<C-t>', 'j', { desc = 'Move down' })
+
 -- Keybinds to make split navigation easier.
---  Use CTRL+<hjkl> to switch between windows
+--  Use CTRL+r/s/c/t to switch between windows
 --
 --  See `:help wincmd` for a list of all window commands
-vim.keymap.set('n', '<C-h>', '<C-w><C-h>', { desc = 'Move focus to the left window' })
-vim.keymap.set('n', '<C-l>', '<C-w><C-l>', { desc = 'Move focus to the right window' })
-vim.keymap.set('n', '<C-j>', '<C-w><C-j>', { desc = 'Move focus to the lower window' })
-vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
+vim.keymap.set('n', '<C-w><C-r>', '<C-w><C-h>', { desc = 'Move focus to the left window' })
+vim.keymap.set('n', '<C-w><C-n>', '<C-w><C-l>', { desc = 'Move focus to the right window' })
+vim.keymap.set('n', '<C-w><C-t>', '<C-w><C-j>', { desc = 'Move focus to the lower window' })
+vim.keymap.set('n', '<C-w><C-c>', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
 
 -- NOTE: Some terminals have colliding keymaps or are not able to send distinct keycodes
 -- vim.keymap.set("n", "<C-S-h>", "<C-w>H", { desc = "Move window to the left" })
@@ -859,6 +865,11 @@ require('lazy').setup({
         default = { 'lsp', 'path', 'snippets', 'lazydev' },
         providers = {
           lazydev = { module = 'lazydev.integrations.blink', score_offset = 100 },
+          cmdline = {
+            enabled = function()
+              return vim.fn.getcmdtype() ~= ':' or not vim.fn.getcmdline():match "^[%0-9,'<>%-]*!"
+            end,
+          },
         },
       },
 
