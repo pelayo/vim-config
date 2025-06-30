@@ -885,8 +885,8 @@ require('lazy').setup({
       fuzzy = { implementation = 'lua' },
 
       -- Shows a signature help window while you type arguments for a function
-    signature = { enabled = true },
-  },
+      signature = { enabled = true },
+    },
   },
 
   { -- Enhanced TypeScript support with auto-imports on completion
@@ -981,6 +981,19 @@ require('lazy').setup({
     --    - Incremental selection: Included, see `:help nvim-treesitter-incremental-selection-mod`
     --    - Show your current context: https://github.com/nvim-treesitter/nvim-treesitter-context
     --    - Treesitter + textobjects: https://github.com/nvim-treesitter/nvim-treesitter-textobjects
+  },
+  {
+    'jackMort/ChatGPT.nvim',
+    event = 'VeryLazy',
+    config = function()
+      require('chatgpt').setup()
+    end,
+    dependencies = {
+      'MunifTanjim/nui.nvim',
+      'nvim-lua/plenary.nvim',
+      'folke/trouble.nvim', -- optional
+      'nvim-telescope/telescope.nvim',
+    },
   },
 
   -- The following comments only work if you have downloaded the kickstart repo, not just copy pasted the
