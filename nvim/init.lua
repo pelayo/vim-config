@@ -93,6 +93,28 @@ vim.g.maplocalleader = ' '
 -- Set to true if you have a Nerd Font installed and selected in the terminal
 vim.g.have_nerd_font = false
 
+-- Provide explicit filetype associations for modern JavaScript tooling.
+-- This helps when working with Vite projects that rely on mixed module
+-- extensions or JSX/TSX files.
+vim.filetype.add {
+  extension = {
+    cjs = 'javascript',
+    mjs = 'javascript',
+    cts = 'typescript',
+    mts = 'typescript',
+    jsx = 'javascriptreact',
+    tsx = 'typescriptreact',
+  },
+  filename = {
+    ['vite.config.js'] = 'javascript',
+    ['vite.config.cjs'] = 'javascript',
+    ['vite.config.mjs'] = 'javascript',
+    ['vite.config.ts'] = 'typescript',
+    ['vite.config.cts'] = 'typescript',
+    ['vite.config.mts'] = 'typescript',
+  },
+}
+
 -- [[ Setting options ]]
 -- See `:help vim.o`
 -- NOTE: You can change these options as you wish!
@@ -919,13 +941,46 @@ require('lazy').setup({
       --  Check out: https://github.com/echasnovski/mini.nvim
     end,
   },
+  {
+    'numToStr/Comment.nvim',
+    event = { 'BufReadPost', 'BufNewFile' },
+    dependencies = { 'JoosepAlviste/nvim-ts-context-commentstring' },
+    opts = function()
+      local comment_integration = require('ts_context_commentstring.integrations.comment_nvim')
+      return {
+        pre_hook = comment_integration.create_pre_hook(),
+      }
+    end,
+  },
   { -- Highlight, edit, and navigate code
     'nvim-treesitter/nvim-treesitter',
     build = ':TSUpdate',
     main = 'nvim-treesitter.configs', -- Sets main module to use for opts
+    dependencies = {
+      { 'windwp/nvim-ts-autotag', opts = {} },
+      { 'JoosepAlviste/nvim-ts-context-commentstring', opts = { enable_autocmd = false } },
+    },
     -- [[ Configure Treesitter ]] See `:help nvim-treesitter`
     opts = {
-      ensure_installed = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc', 'javascript', 'typescript' },
+      ensure_installed = {
+        'bash',
+        'c',
+        'css',
+        'diff',
+        'html',
+        'javascript',
+        'jsdoc',
+        'json',
+        'lua',
+        'luadoc',
+        'markdown',
+        'markdown_inline',
+        'query',
+        'tsx',
+        'typescript',
+        'vim',
+        'vimdoc',
+      },
       -- Autoinstall languages that are not installed
       auto_install = true,
       highlight = {
@@ -936,6 +991,8 @@ require('lazy').setup({
         additional_vim_regex_highlighting = { 'ruby' },
       },
       indent = { enable = true, disable = { 'ruby' } },
+      context_commentstring = { enable = true, enable_autocmd = false },
+      autotag = { enable = true },
     },
     -- There are additional nvim-treesitter modules that you can use to interact
     -- with nvim-treesitter. You should go explore a few and see what interests you:
