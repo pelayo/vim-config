@@ -1,0 +1,5 @@
+# Local Neovim sandbox artifacts (created by headless checks)
+.xdg-cache/
+.xdg-config/
+.xdg-data/
+.xdg-state/
