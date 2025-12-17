@@ -218,6 +218,18 @@ vim.api.nvim_create_autocmd('TextYankPost', {
   end,
 })
 
+-- Markdown: wrap lines + nicer rendering defaults
+vim.api.nvim_create_autocmd('FileType', {
+  desc = 'Markdown readability settings',
+  group = vim.api.nvim_create_augroup('pelayo-markdown', { clear = true }),
+  pattern = 'markdown',
+  callback = function()
+    vim.opt_local.wrap = true
+    vim.opt_local.linebreak = true
+    vim.opt_local.conceallevel = 2
+  end,
+})
+
 -- [[ Install `lazy.nvim` plugin manager ]]
 --    See `:help lazy.nvim.txt` or https://github.com/folke/lazy.nvim for more info
 local lazypath = vim.fn.stdpath 'data' .. '/lazy/lazy.nvim'
@@ -982,6 +994,12 @@ require('lazy').setup({
     --    - Incremental selection: Included, see `:help nvim-treesitter-incremental-selection-mod`
     --    - Show your current context: https://github.com/nvim-treesitter/nvim-treesitter-context
     --    - Treesitter + textobjects: https://github.com/nvim-treesitter/nvim-treesitter-textobjects
+  },
+  { -- Render markdown in-buffer for easier reading
+    'MeanderingProgrammer/render-markdown.nvim',
+    ft = { 'markdown' },
+    dependencies = { 'nvim-treesitter/nvim-treesitter' },
+    opts = {},
   },
   {
     'jackMort/ChatGPT.nvim',
