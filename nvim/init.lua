@@ -190,16 +190,13 @@ vim.keymap.set('t', '<Esc><Esc>', '<C-\\><C-n>', { desc = 'Exit terminal mode' }
 -- vim.keymap.set('n', '<up>', '<cmd>echo "Use k to move!!"<CR>')
 -- vim.keymap.set('n', '<down>', '<cmd>echo "Use j to move!!"<CR>')
 
--- Movement keys for a Spanish dvorak layout
-vim.keymap.set({ 'n', 'x', 'o' }, '<C-r>', 'h', { desc = 'Move left' })
-vim.keymap.set({ 'n', 'x', 'o' }, '<C-n>', 'l', { desc = 'Move right' })
-vim.keymap.set({ 'n', 'x', 'o' }, '<C-c>', 'k', { desc = 'Move up' })
-vim.keymap.set({ 'n', 'x', 'o' }, '<C-t>', 'j', { desc = 'Move down' })
-
--- Keybinds to make split navigation easier.
 --  Use CTRL+r/s/c/t to switch between windows
 --
 --  See `:help wincmd` for a list of all window commands
+vim.keymap.set('n', '<C-w><C-r>', '<C-w><C-h>', { desc = 'Move focus to the left window' })
+vim.keymap.set('n', '<C-w><C-n>', '<C-w><C-l>', { desc = 'Move focus to the right window' })
+vim.keymap.set('n', '<C-w><C-t>', '<C-w><C-j>', { desc = 'Move focus to the lower window' })
+vim.keymap.set('n', '<C-w><C-c>', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
 
 -- NOTE: Some terminals have colliding keymaps or are not able to send distinct keycodes
 -- vim.keymap.set("n", "<C-S-h>", "<C-w>H", { desc = "Move window to the left" })
@@ -218,18 +215,6 @@ vim.api.nvim_create_autocmd('TextYankPost', {
   group = vim.api.nvim_create_augroup('kickstart-highlight-yank', { clear = true }),
   callback = function()
     vim.hl.on_yank()
-  end,
-})
-
--- Markdown: wrap lines + nicer rendering defaults
-vim.api.nvim_create_autocmd('FileType', {
-  desc = 'Markdown readability settings',
-  group = vim.api.nvim_create_augroup('pelayo-markdown', { clear = true }),
-  pattern = 'markdown',
-  callback = function()
-    vim.opt_local.wrap = true
-    vim.opt_local.linebreak = true
-    vim.opt_local.conceallevel = 2
   end,
 })
 
@@ -263,6 +248,7 @@ require('lazy').setup({
   -- NOTE: Plugins can be added with a link (or for a github repo: 'owner/repo' link).
   'preservim/nerdtree',
   'terrastruct/d2-vim',
+  'NMAC427/guess-indent.nvim', -- Detect tabstop and shiftwidth automatically
 
   -- NOTE: Plugins can also be added by using a table,
   -- with the first argument being the link and the following
@@ -751,6 +737,47 @@ require('lazy').setup({
     end,
   },
 
+  { -- Autoformat
+    'stevearc/conform.nvim',
+    event = { 'BufWritePre' },
+    cmd = { 'ConformInfo' },
+    keys = {
+      {
+        '<leader>f',
+        function()
+          require('conform').format { async = true, lsp_format = 'fallback' }
+        end,
+        mode = '',
+        desc = '[F]ormat buffer',
+      },
+    },
+    opts = {
+      notify_on_error = false,
+      format_on_save = function(bufnr)
+        -- Disable "format_on_save lsp_fallback" for languages that don't
+        -- have a well standardized coding style. You can add additional
+        -- languages here or re-enable it for the disabled ones.
+        local disable_filetypes = { c = true, cpp = true }
+        if disable_filetypes[vim.bo[bufnr].filetype] then
+          return nil
+        else
+          return {
+            timeout_ms = 500,
+            lsp_format = 'fallback',
+          }
+        end
+      end,
+      formatters_by_ft = {
+        lua = { 'stylua' },
+        -- Conform can also run multiple formatters sequentially
+        -- python = { "isort", "black" },
+        --
+        -- You can use 'stop_after_first' to run the first available formatter from the list
+        -- javascript = { "prettierd", "prettier", stop_after_first = true },
+      },
+    },
+  },
+
   { -- Autocompletion
     'saghen/blink.cmp',
     event = 'VimEnter',
@@ -956,47 +983,19 @@ require('lazy').setup({
     --    - Show your current context: https://github.com/nvim-treesitter/nvim-treesitter-context
     --    - Treesitter + textobjects: https://github.com/nvim-treesitter/nvim-treesitter-textobjects
   },
-  { -- Render markdown in-buffer for easier reading
-    'MeanderingProgrammer/render-markdown.nvim',
-    ft = { 'markdown' },
-    dependencies = { 'nvim-treesitter/nvim-treesitter' },
-    opts = {},
-  },
   {
-    "olimorris/codecompanion.nvim",
-    dependencies = { "nvim-lua/plenary.nvim", "nvim-treesitter/nvim-treesitter" },
+    'jackMort/ChatGPT.nvim',
+    event = 'VeryLazy',
     config = function()
-      require("codecompanion").setup({
-        strategies = {
-          chat   = { adapter = "openai_compatible" },
-          inline = { adapter = "openai_compatible" },
-          cmd    = { adapter = "openai_compatible" },
-        },
-        adapters = {
-          openai_compatible = function()
-            return require("codecompanion.adapters").extend("openai_compatible", {
-              env = {
-                url = "http://172.27.96.1:1234",
-                api_key = "ollama", -- any non-empty string works
-              },
-              schema = {
-                -- Use an id that exists in `curl :11434/v1/models`, e.g.:
-                model = { default = "qwen/qwen3-4b-2507" },
-              },
-            })
-          end,
-        },
-        request = { timeout = 20000 },
-      })
+      require('chatgpt').setup()
     end,
-    -- Optional keybindings
-    vim.keymap.set({ "n", "v" }, "<leader>a", "", { desc = "AI" }),
-    vim.keymap.set("n", "<leader>ac", "<cmd>CodeCompanionChat Toggle<cr>", { desc = "Open CodeCompanion Chat" }),
-    vim.keymap.set("n", "<leader>ai", "<cmd>CodeCompanion<cr>", { desc = "Inline CodeCompanion" }),
-    vim.keymap.set("n", "<leader>aa", "<cmd>CodeCompanionActions<cr>", { desc = "CodeCompanion Actions" }),
-  }
-
-  
+    dependencies = {
+      'MunifTanjim/nui.nvim',
+      'nvim-lua/plenary.nvim',
+      'folke/trouble.nvim', -- optional
+      'nvim-telescope/telescope.nvim',
+    },
+  },
 
   -- The following comments only work if you have downloaded the kickstart repo, not just copy pasted the
   -- init.lua. If you want these files, they are in the repository, so you can just download them and
